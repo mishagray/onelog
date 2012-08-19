@@ -6,9 +6,60 @@ config =
   methods: ['debug', 'info', 'notice', 'warning', 'error', 'crit', 'alert',
             'emerg', 'trace', 'log', 'warn', 'line']
 
-_library = {}
+# Interfaces
+# ------------------------------------------------------------------------------
 
-_defaultLogger = {}
+# Logger wrapper delegates to underlying logger
+class Logger
+  constructor: (@logger) ->
+    @enabled = true
+    for method in config.methods
+      do (method) =>
+        Logger::[method] = (a...) ->
+          return if not @enabled
+          if @logger[method]?
+            @logger[method] a...
+          else
+            @logger[_library.defaultLevel] a...
+  # Disable logger for a single level or all levels if no argument
+  # TODO: Level functionality
+  suppress: (level) -> @enabled = false
+  allow: (level) -> @enabled = true
+
+# Logging library interface
+class Library
+
+  # Create or get a new logger
+  getLogger: (category) ->
+  # Get direct access to library
+  get: ->
+  # Default level when an unsupported level is encountered
+  middleware: (opts) ->
+    (req, res, next) -> next()
+  # If library doesn't support a level, this default level is used
+  defaultLevel: ->
+    return 'info'
+    if @.log?
+      return 'log'
+    else if @.info?
+      return 'info'
+    else
+      throw new Error 'Could not find a default level to fallback to'
+
+# Default logging library
+# ------------------------------------------------------------------------------
+
+# Standard console library
+class Console extends Library
+  constructor: ->
+  get: (category) ->
+    new Logger console
+
+# The library we want to use for logging
+_library = undefined
+
+# The logger used when no namespace is defined
+_defaultLogger = undefined
 
 # Public API
 # ------------------------------------------------------------------------------
@@ -33,46 +84,15 @@ exports.use = (clazz, opts) ->
       exports[method] = (a...) -> _defaultLogger[method] a...
 
 # Create or get a logger instance
-exports.get = (category) -> _library.get category
+exports.get = (category) ->
+  _library.get category
 
 # Support for logule namespaces
-exports.sub = (namespaces...) -> _library.sub
+exports.sub = (namespaces...) ->
+  _library.sub
 
-exports.middleware = (opts) -> _library.middleware opts
-
-# Interfaces
-# ------------------------------------------------------------------------------
-
-# Logger interface
-class Logger
-  constructor: (@logger) ->
-    for method in config.methods
-      do (method) =>
-        Logger::[method] = (a...) ->
-          if @logger[method]?
-            @logger[method] a...
-          else
-            @logger[_library.defaultLevel] a...
-
-# Logging library interface
-class Library
-
-  # Create or get a new logger
-  getLogger: (category) ->
-  # Get direct access to library
-  get: ->
-  # Default level when an unsupported level is encountered
-  middleware: (opts) ->
-    (req, res, next) -> next()
-  # If library doesn't support a level, this default level is used
-  defaultLevel: ->
-    return 'info'
-    if @.log?
-      return 'log'
-    else if @.info?
-      return 'info'
-    else
-      throw new Error 'Could not find a default level to fallback to'
+exports.middleware = (opts) ->
+  _library.middleware opts
 
 # Provided library adapters
 # ------------------------------------------------------------------------------
@@ -169,3 +189,5 @@ exports.Winston = Winston
 exports.Caterpillar = Caterpillar
 exports.Tracer = Tracer
 
+# Initiate default logger
+exports.use Console
