@@ -34,6 +34,10 @@ Add logging statements like this:
     logger = require('onelog).get('Foo.Bar')
     logger.debug 'FooBar!'
     
+For more examples run `npm install && coffee examples/example.coffee`
+
+![examples](https://github.com/vjpr/onelog/tree/master/examples/examples.png)
+    
 ## Configuration
 
 I put all my library dependent configuration in a function so I can easily toggle between libraries.

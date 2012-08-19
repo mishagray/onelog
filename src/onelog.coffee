@@ -28,6 +28,9 @@ exports.use = (clazz, opts) ->
   _defaultLogger = _library.get()
   if opts?.methods?
     _.extend config.methods, opts.methods
+  for method in config.methods
+    do (method) =>
+      exports[method] = (a...) -> _defaultLogger[method] a...
 
 # Create or get a logger instance
 exports.get = (category) -> _library.get category
@@ -45,7 +48,6 @@ class Logger
   constructor: (@logger) ->
     for method in config.methods
       do (method) =>
-        exports[method] = (a...) -> _defaultLogger[method] a...
         Logger::[method] = (a...) ->
           if @logger[method]?
             @logger[method] a...
@@ -62,6 +64,15 @@ class Library
   # Default level when an unsupported level is encountered
   middleware: (opts) ->
     (req, res, next) -> next()
+  # If library doesn't support a level, this default level is used
+  defaultLevel: ->
+    return 'info'
+    if @.log?
+      return 'log'
+    else if @.info?
+      return 'info'
+    else
+      throw new Error 'Could not find a default level to fallback to'
 
 # Provided library adapters
 # ------------------------------------------------------------------------------
@@ -107,7 +118,6 @@ class Winston extends Library
 
   constructor: ->
     @winston = require 'winston'
-    @expressWinston = require 'express-winston'
 
   get: (category) ->
     logger = null
@@ -121,6 +131,7 @@ class Winston extends Library
     logger
 
   middleware: (opts) ->
+    @expressWinston = require 'express-winston'
     if opts?.winston.type is 'error'
       return @expressWinston.errorLogger
         transports: [
