@@ -36,7 +36,7 @@ Add logging statements like this:
     
 For more examples run `npm install && coffee examples/example.coffee`
 
-![examples](https://github.com/vjpr/onelog/tree/master/examples/examples.png)
+![examples](https://raw.github.com/vjpr/onelog/master/examples/example.png)
     
 ## Configuration
 
