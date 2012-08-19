@@ -60,7 +60,7 @@ I put all my library dependent configuration in a function so I can easily toggl
     app.use onelog.middleware,
       category: 'Middleware'
     
-For Winson we use `express-winston` which provides two separate middlewares:
+For Winston we use `express-winston` which provides two separate middlewares:
 
     app.use onelog.middleware,
       winston:
