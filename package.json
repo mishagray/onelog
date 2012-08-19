@@ -1,0 +1,33 @@
+{
+  "name": "onelog",
+  "description": "A logging consolidation library",
+  "version": "0.1.0",
+  "author": {
+    "name": "Vaughan Rouesnel",
+    "email": "vrouesnel@gmail.com",
+    "url": "http://vaughan.io"
+  },
+  "homepage": "https://github.com/vjpr/onelog",
+  "main": "index",
+  "keywords": [
+    "logging", "logger"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vjpr/onelog.git"
+  },
+  "dependencies": {
+    "underscore": "*",
+    "coffee-script": "*"
+  },
+  "devDependencies": {
+    "log4js": "*",
+    "winston": "*",
+    "logule": "*",
+    "caterpillar": "*",
+    "tracer": "*"
+  },
+  "licenses": [{
+    "type": "MIT"
+  }]
+}
