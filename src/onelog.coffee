@@ -4,7 +4,8 @@ _ = require 'underscore'
 config =
   # TODO: Add a more thorough list of common methods
   methods: ['debug', 'info', 'notice', 'warning', 'error', 'crit', 'alert',
-            'emerg', 'trace', 'log', 'warn', 'line']
+            'emerg', 'trace', 'log', 'warn', 'line', 'time', 'timeEnd',
+            'profile', 'assert', 'log']
 
 # Interfaces
 # ------------------------------------------------------------------------------
@@ -20,7 +21,8 @@ class Logger
           if @logger[method]?
             @logger[method] a...
           else
-            @logger[_library.defaultLevel] a...
+            defaultMethod = _library.defaultLevel()
+            @logger[defaultMethod] a...
   # Disable logger for a single level or all levels if no argument
   # TODO: Level functionality
   suppress: (level) -> @enabled = false
