@@ -116,7 +116,7 @@ class Log4js extends Library
     # TODO: Allow more options
     return @log4js.connectLogger @log4js.getLogger(category), level: level
 
-  defaultLevel: 'info'
+  defaultLevel: -> 'info'
 
 class Logule extends Library
 
