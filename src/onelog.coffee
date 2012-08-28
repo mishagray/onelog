@@ -5,7 +5,7 @@ config =
   # TODO: Add a more thorough list of common methods
   methods: ['debug', 'info', 'notice', 'warning', 'error', 'crit', 'alert',
             'emerg', 'trace', 'log', 'warn', 'line', 'time', 'timeEnd',
-            'profile', 'assert', 'log']
+            'profile', 'assert', 'log', 'fatal']
 
 # Interfaces
 # ------------------------------------------------------------------------------
