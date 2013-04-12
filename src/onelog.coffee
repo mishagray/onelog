@@ -52,6 +52,8 @@ class Library
   getLogger: (category) ->
   # Get direct access to library
   get: ->
+  # Get options set in library.
+  getOpts: ->
   # Default level when an unsupported level is encountered
   middleware: (opts) ->
     (req, res, next) -> next()
@@ -95,6 +97,13 @@ exports.use = (clazz, opts) ->
         "
   _library = new clazz
   _defaultLogger = _library.get()
+
+  # Allow custom methods for logger specified by library.
+  # E.g. log4js uses`logger.setLevel`
+  if _library.getOpts()?
+    config.methods = _.union config.methods, _library.getOpts().methods
+  
+  # Allow custom methods for logger passed in by user.
   if opts?.methods?
     config.methods = _.union config.methods, opts.methods
   for method in config.methods
@@ -125,6 +134,9 @@ class Log4js extends Library
       return new Logger @log4js.getLogger(category)
     else
       return new Logger @log4js.getDefaultLogger()
+
+  getOpts: ->
+    return methods: 'setLevel'
 
   middleware: (opts) ->
     category = opts?.category or 'Middleware'
