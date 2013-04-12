@@ -54,6 +54,8 @@ class Library
   get: ->
   # Get options set in library.
   getOpts: ->
+  # Get an instance of the underlying library we are using if one exists.
+  getLibraryInstance: ->
   # Default level when an unsupported level is encountered
   middleware: (opts) ->
     (req, res, next) -> next()
@@ -121,6 +123,9 @@ exports.sub = (namespaces...) ->
 exports.middleware = (opts) ->
   _library.middleware opts
 
+exports.getLibrary = ->
+  _library?.getLibrary()
+
 # Provided library adapters
 # ------------------------------------------------------------------------------
 
@@ -137,6 +142,9 @@ class Log4js extends Library
 
   getOpts: ->
     return methods: 'setLevel'
+
+  getLibrary: ->
+    return @log4js
 
   middleware: (opts) ->
     category = opts?.category or 'Middleware'
