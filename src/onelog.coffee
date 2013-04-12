@@ -1,11 +1,24 @@
 # 3rd party libs
 _ = require 'underscore'
 
+# Hash of timers.
+timers = {}
+
 config =
   # TODO: Add a more thorough list of common methods
   methods: ['debug', 'info', 'notice', 'warning', 'error', 'crit', 'alert',
             'emerg', 'trace', 'log', 'warn', 'line', 'time', 'timeEnd',
-            'profile', 'assert', 'log', 'fatal', 'dir']
+            'profile', 'assert', 'log', 'fatal', 'dir', 'start', 'stop']
+
+# Timers
+# ------
+
+start = (label) ->
+  timers[label] = Date.now()
+
+stop = (label) ->
+  duration = Date.now() - timers[label]
+  return duration
 
 # Interfaces
 # ------------------------------------------------------------------------------
@@ -18,7 +31,11 @@ class Logger
       do (method) =>
         Logger::[method] = (a...) ->
           return if not @enabled
-          if @logger[method]?
+          if method is 'start'
+            @logger[method] = time
+          else if method is 'stop'
+            @logger[method] = timeEnd
+          else if @logger[method]?
             @logger[method] a...
           else
             defaultMethod = _library.defaultLevel()
@@ -40,10 +57,9 @@ class Library
     (req, res, next) -> next()
   # If library doesn't support a level, this default level is used
   defaultLevel: ->
-    return 'info'
-    if @.log?
+    if @log?
       return 'log'
-    else if @.info?
+    else if @info?
       return 'info'
     else
       throw new Error 'Could not find a default level to fallback to'
@@ -80,7 +96,7 @@ exports.use = (clazz, opts) ->
   _library = new clazz
   _defaultLogger = _library.get()
   if opts?.methods?
-    _.extend config.methods, opts.methods
+    config.methods = _.union config.methods, opts.methods
   for method in config.methods
     do (method) =>
       exports[method] = (a...) -> _defaultLogger[method] a...
