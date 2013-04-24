@@ -76,6 +76,7 @@ class Console extends Library
   constructor: ->
   get: (category) ->
     new Logger console
+  defaultLevel: -> 'log'
 
 # The library we want to use for logging
 _library = undefined
