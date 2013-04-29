@@ -1,7 +1,7 @@
 {
   "name": "onelog",
   "description": "A logging consolidation library",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": {
     "name": "Vaughan Rouesnel",
     "email": "vrouesnel@gmail.com",
