@@ -17,8 +17,7 @@
     "url": "git://github.com/vjpr/onelog.git"
   },
   "dependencies": {
-    "underscore": "*",
-    "coffee-script": "*"
+    "underscore": "*"
   },
   "devDependencies": {
     "log4js": "*",
