@@ -32,9 +32,9 @@ class Logger
         Logger::[method] = (a...) ->
           return if not @enabled
           if method is 'start'
-            @logger[method] = start
+            start a...
           else if method is 'stop'
-            @logger[method] = stop
+            stop a...
           else if @logger[method]?
             @logger[method] a...
           else
