@@ -8,7 +8,8 @@ config =
   # TODO: Add a more thorough list of common methods
   methods: ['debug', 'info', 'notice', 'warning', 'error', 'crit', 'alert',
             'emerg', 'trace', 'log', 'warn', 'line', 'time', 'timeEnd',
-            'profile', 'assert', 'log', 'fatal', 'dir', 'start', 'stop']
+            'profile', 'assert', 'log', 'fatal', 'dir', 'start', 'stop',
+            'isLevelEnabled']
 
 # Timers
 # ------
@@ -38,7 +39,7 @@ class Logger
           else if @logger[method]?
             @logger[method] a...
           else
-            defaultMethod = _library.defaultLevel()
+            defaultMethod = GLOBAL.onelog._library.defaultLevel()
             @logger[defaultMethod] a...
   # Disable logger for a single level or all levels if no argument
   # TODO: Level functionality
@@ -84,13 +85,23 @@ _library = undefined
 # The logger used when no namespace is defined
 _defaultLogger = undefined
 
+stackTrace = require 'stack-trace'
+path = require 'path'
+getCallerFile = ->
+  frame = stackTrace.get()[2]
+  #file = path.basename frame.getFileName()
+  file = frame.getFileName()
+  line = frame.getLineNumber()
+  method = frame.getFunctionName()
+  "#{frame.getTypeName()} #{file}: #{line} in #{method}()"
+
 # Public API
 # ------------------------------------------------------------------------------
 
 # opts
 #   - methods: Custom level. If you change to a logging library that does not
 #       support these levels, a default level will be used.
-exports.use = (clazz, opts) ->
+exports.use = (clazz, opts = {}) ->
   # Check interface of clazz
   for k of Library::
     if not clazz?.prototype[k]
@@ -98,13 +109,21 @@ exports.use = (clazz, opts) ->
         Invalid logging library prototype.
         You must pass in a class with a prototype that adheres to Library.
         "
-  _library = new clazz
-  _defaultLogger = _library.get()
+
+  # Do not allow overriding if already initialized.
+  if not GLOBAL.onelog?
+    GLOBAL.onelog or= {}
+    GLOBAL.onelog._library = _library = new clazz opts.lib
+    GLOBAL.onelog._defaultLogger = _defaultLogger = _library.get()
+    console.log "OneLog is using logging library #{clazz.name} - Initialized from #{getCallerFile arguments}"
+  else
+    _library = GLOBAL.onelog._library
+    _defaultLogger = GLOBAL.onelog._defaultLogger
 
   # Allow custom methods for logger specified by library.
   # E.g. log4js uses`logger.setLevel`
-  if _library.getOpts()?
-    config.methods = _.union config.methods, _library.getOpts().methods
+  if GLOBAL.onelog._library.getOpts()?
+    config.methods = _.union config.methods, GLOBAL.onelog._library.getOpts().methods
   
   # Allow custom methods for logger passed in by user.
   if opts?.methods?
@@ -115,25 +134,29 @@ exports.use = (clazz, opts) ->
 
 # Create or get a logger instance
 exports.get = (category) ->
-  _library.get category
+  # Initiate default logger if none has been setup.
+  unless GLOBAL.onelog? then exports.use Console
+  GLOBAL.onelog._library.get category
 
 # Support for logule namespaces
 exports.sub = (namespaces...) ->
-  _library.sub
+  GLOBAL.onelog._library.sub
 
 exports.middleware = (opts) ->
-  _library.middleware opts
+  GLOBAL.onelog._library.middleware opts
 
 exports.getLibrary = ->
-  _library?.getLibrary()
+  GLOBAL.onelog._library?.getLibrary()
 
 # Provided library adapters
 # ------------------------------------------------------------------------------
 
 class Log4js extends Library
 
-  constructor: ->
-    @log4js = require 'log4js'
+  name: 'Log4js'
+
+  constructor: (@log4js) ->
+    unless @log4js? then @log4js = require 'log4js'
 
   get: (category) ->
     if category
@@ -157,6 +180,8 @@ class Log4js extends Library
 
 class Logule extends Library
 
+  name: 'Logule'
+
   constructor: ->
     @logule = require 'logule'
 
@@ -174,6 +199,8 @@ class Logule extends Library
       next()
 
 class Winston extends Library
+
+  name: 'Winston'
 
   constructor: ->
     @winston = require 'winston'
@@ -208,6 +235,8 @@ class Winston extends Library
 
 class Caterpillar extends Library
 
+  name: 'Caterpillar'
+
   constructor: ->
     @caterpillar = require 'caterpillar'
 
@@ -227,6 +256,3 @@ exports.Log4js = Log4js
 exports.Winston = Winston
 exports.Caterpillar = Caterpillar
 exports.Tracer = Tracer
-
-# Initiate default logger
-exports.use Console

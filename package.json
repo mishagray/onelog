@@ -10,14 +10,16 @@
   "homepage": "https://github.com/vjpr/onelog",
   "main": "index",
   "keywords": [
-    "logging", "logger"
+    "logging",
+    "logger"
   ],
   "repository": {
     "type": "git",
     "url": "git://github.com/vjpr/onelog.git"
   },
   "dependencies": {
-    "underscore": "*"
+    "underscore": "*",
+    "stack-trace": "0.0.6"
   },
   "devDependencies": {
     "log4js": "*",
@@ -26,7 +28,9 @@
     "caterpillar": "*",
     "tracer": "*"
   },
-  "licenses": [{
-    "type": "MIT"
-  }]
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ]
 }
