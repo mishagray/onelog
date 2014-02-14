@@ -8,9 +8,9 @@
 
 I built this because I wanted to play around with different logging libraries without being locked into one.
 
-Use one logging library for development and one for production.
-
 Onelog provides a generic API to use so you can start adding logging statements and worry about which library to pick later.
+
+So if your spending any time worrying about which logging library is best - don't, just pick this one.
 
 ## Install
 
