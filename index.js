@@ -1,1 +1,1 @@
-module.exports = require('./src/onelog.coffee');
+module.exports = require('./src/onelog.js');
