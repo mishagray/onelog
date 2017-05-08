@@ -42,7 +42,7 @@ class Logger {
             return start(...Array.from(a || []));
           } else if (method === 'timeEnd') {
             return this.logger.debug(`${a}: ${stop(...Array.from(a || []))}ms`);
-          } else if (this.logger[method] != null) {
+          } else if (this.logger[method]) {
             return this.logger[method](...Array.from(a || []));
           } else {
             const defaultMethod = GLOBAL.onelog._library.defaultLevel();
@@ -75,9 +75,9 @@ class Library {
   }
   // If library doesn't support a level, this default level is used
   defaultLevel() {
-    if (this.log != null) {
+    if (this.log) {
       return 'log';
-    } else if (this.info != null) {
+    } else if (this.info) {
       return 'info';
     } else {
       throw new Error('Could not find a default level to fallback to');
@@ -125,9 +125,9 @@ const getCallerFile = function() {
 let defaultExport = {};
 defaultExport.use = function(clazz, opts) {
   // Check interface of clazz
-  if (opts == null) { opts = {}; }
+  if (!opts) { opts = {}; }
   for (let k in Library.prototype) {
-    if (!(clazz != null ? clazz.prototype[k] : undefined)) {
+    if (!(clazz ? clazz.prototype[k] : undefined)) {
       throw new Error(`\
 Invalid logging library prototype. \
 You must pass in a class with a prototype that adheres to Library.\
@@ -137,7 +137,7 @@ You must pass in a class with a prototype that adheres to Library.\
   }
 
   // Do not allow overriding if already initialized.
-  if ((GLOBAL.onelog == null)) {
+  if ((!GLOBAL.onelog)) {
     if (!GLOBAL.onelog) { GLOBAL.onelog = {}; }
     GLOBAL.onelog._library = (_library = new clazz(opts.lib));
     GLOBAL.onelog._defaultLogger = (_defaultLogger = _library.get());
@@ -149,12 +149,12 @@ You must pass in a class with a prototype that adheres to Library.\
 
   // Allow custom methods for logger specified by library.
   // E.g. log4js uses`logger.setLevel`
-  if (GLOBAL.onelog._library.getOpts() != null) {
+  if (GLOBAL.onelog._library.getOpts()) {
     config.methods = _.union(config.methods, GLOBAL.onelog._library.getOpts().methods);
   }
 
   // Allow custom methods for logger passed in by user.
-  if ((opts != null ? opts.methods : undefined) != null) {
+  if ((opts ? opts.methods : undefined)) {
     config.methods = _.union(config.methods, opts.methods);
   }
   return Array.from(config.methods).map((method) =>
@@ -166,7 +166,7 @@ You must pass in a class with a prototype that adheres to Library.\
 // Create or get a logger instance
 defaultExport.get = function(category) {
   // Initiate default logger if none has been setup.
-  if (GLOBAL.onelog == null) { defaultExport.use(Console); }
+  if (!GLOBAL.onelog) { defaultExport.use(Console); }
   return GLOBAL.onelog._library.get(category);
 };
 
@@ -175,7 +175,7 @@ defaultExport.sub = (...namespaces) => GLOBAL.onelog._library.sub;
 
 defaultExport.middleware = opts => GLOBAL.onelog._library.middleware(opts);
 
-defaultExport.getLibrary = () => GLOBAL.onelog._library != null ? GLOBAL.onelog._library.getLibrary() : undefined;
+defaultExport.getLibrary = () => GLOBAL.onelog._library ? GLOBAL.onelog._library.getLibrary() : undefined;
 
 // Provided library adapters
 // ------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ class Log4js extends Library {
   constructor(log4js) {
     super();
     this.log4js = log4js;
-    if (this.log4js == null) { this.log4js = require('log4js'); }
+    if (!this.log4js) { this.log4js = require('log4js'); }
   }
 
   get(category) {
@@ -209,8 +209,8 @@ class Log4js extends Library {
   }
 
   middleware(opts) {
-    const category = (opts != null ? opts.category : undefined) || 'Middleware';
-    const level = (opts != null ? opts.level : undefined) || this.log4js.levels.INFO;
+    const category = (opts ? opts.category : undefined) || 'Middleware';
+    const level = (opts ? opts.level : undefined) || this.log4js.levels.INFO;
     // TODO: Allow more options
     return this.log4js.connectLogger(this.log4js.getLogger(category), {level});
   }
@@ -239,8 +239,8 @@ class Logule extends Library {
   }
 
   middleware(opts) {
-    const category = (opts != null ? opts.category : undefined) || 'Middleware';
-    const level = (opts != null ? opts.level : undefined) || 'trace';
+    const category = (opts ? opts.category : undefined) || 'Middleware';
+    const level = (opts ? opts.level : undefined) || 'trace';
     return function(req, res, next) {
       expressLogger[level](req.method, req.url.toString());
       return next();
@@ -279,7 +279,7 @@ class Winston extends Library {
 
   middleware(opts) {
     this.expressWinston = require('express-winston');
-    if ((opts != null ? opts.winston.type : undefined) === 'error') {
+    if ((opts ? opts.winston.type : undefined) === 'error') {
       return this.expressWinston.errorLogger({
         transports: [
           new this.winston.transports.Console({
@@ -288,7 +288,7 @@ class Winston extends Library {
           })
         ]});
     }
-    if ((opts != null ? opts.winston.type : undefined) === 'request') {
+    if ((opts ? opts.winston.type : undefined) === 'request') {
       return this.expressWinston.logger({
         transports: [
           new this.winston.transports.Console({
