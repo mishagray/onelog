@@ -1,1 +1,1 @@
-module.exports = require('./src/onelog.js');
+module.exports = require('./dist/onelog.js');
