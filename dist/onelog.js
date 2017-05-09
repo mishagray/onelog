@@ -184,7 +184,7 @@ You must pass in a class with a prototype that adheres to Library.\
 defaultExport.get = function (category) {
   // Initiate default logger if none has been setup.
   if (!GLOBAL.onelog) {
-    defaultExport.use(Console);
+    return defaultExport.use(Console);
   }
   return GLOBAL.onelog._library.get(category);
 };
